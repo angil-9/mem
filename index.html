@@ -3,363 +3,946 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MEM</title>
+<title>MEM — Don't Forget Me</title>
 
 <style>
-    * {
-        box-sizing: border-box;
-        user-select: none;
+*{
+    box-sizing:border-box;
+    user-select:none;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+}
+
+body{
+    font-family:Tahoma,Arial,sans-serif;
+    background:#17151a;
+    color:#302a2d;
+    overflow-x:hidden;
+    transition:background 2s,color 2s;
+}
+
+button{
+    font-family:inherit;
+}
+
+#game{
+    min-height:100vh;
+}
+
+/* =========================
+   TOP BAR
+========================= */
+
+#topbar{
+    height:65px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 25px;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:50;
+    background:rgba(255,255,255,.72);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(0,0,0,.08);
+    transition:1s;
+}
+
+#logo{
+    font-size:25px;
+    font-weight:bold;
+    letter-spacing:6px;
+}
+
+#dayText{
+    font-size:15px;
+    font-weight:bold;
+}
+
+/* =========================
+   HOUSE / ROOM
+========================= */
+
+#world{
+    padding-top:65px;
+    min-height:100vh;
+}
+
+#room{
+    width:min(1200px,96%);
+    height:760px;
+    margin:25px auto;
+    position:relative;
+    overflow:hidden;
+    border-radius:22px;
+    background:#cdb8a8;
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.28),
+        inset 0 0 100px rgba(0,0,0,.08);
+    transition:
+        background 2s,
+        filter 2s,
+        box-shadow 2s;
+}
+
+/* WALL */
+
+.wall{
+    position:absolute;
+    inset:0 0 145px 0;
+    background:
+        linear-gradient(
+            rgba(255,255,255,.2),
+            rgba(255,255,255,.02)
+        ),
+        repeating-linear-gradient(
+            90deg,
+            #d9c9bc 0px,
+            #d9c9bc 80px,
+            #d5c4b7 81px,
+            #d5c4b7 82px
+        );
+    transition:2s;
+}
+
+/* FLOOR */
+
+.floor{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    height:150px;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #9b7762 0px,
+            #9b7762 65px,
+            #886652 66px,
+            #886652 68px
+        );
+    box-shadow:inset 0 15px 30px rgba(0,0,0,.18);
+}
+
+/* =========================
+   WINDOW / BALCONY
+========================= */
+
+#window{
+    position:absolute;
+    top:70px;
+    left:50%;
+    transform:translateX(-50%);
+    width:300px;
+    height:250px;
+    background:#9fc0d0;
+    border:14px solid #eee2d8;
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.22),
+        inset 0 0 30px rgba(255,255,255,.2);
+    overflow:hidden;
+    transition:2s;
+}
+
+.windowSky{
+    position:absolute;
+    inset:0;
+    background:
+        linear-gradient(
+            #83b6d1,
+            #d9e8ee 70%,
+            #b6c8cf
+        );
+    transition:2s;
+}
+
+.windowMoon{
+    position:absolute;
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    right:35px;
+    top:25px;
+    background:#fff9d8;
+    box-shadow:0 0 25px rgba(255,249,216,.9);
+    opacity:0;
+    transition:2s;
+}
+
+.windowCity{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    height:70px;
+    background:
+        linear-gradient(
+            to top,
+            #5c666b 0 30%,
+            transparent 30%
+        );
+}
+
+.windowCity:after{
+    content:"";
+    position:absolute;
+    bottom:0;
+    left:15px;
+    width:35px;
+    height:55px;
+    background:#555e63;
+    box-shadow:
+        55px -20px #4d565b,
+        110px 5px #596267,
+        170px -30px #4e585d,
+        220px -5px #525b60;
+}
+
+/* CURTAINS */
+
+.curtain{
+    position:absolute;
+    top:45px;
+    width:80px;
+    height:300px;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #b98c99 0px,
+            #b98c99 15px,
+            #a77b88 16px,
+            #a77b88 27px
+        );
+    z-index:4;
+    box-shadow:0 10px 20px rgba(0,0,0,.15);
+    transition:2s;
+}
+
+.curtain.left{
+    left:calc(50% - 230px);
+    border-radius:0 0 35px 10px;
+}
+
+.curtain.right{
+    right:calc(50% - 230px);
+    border-radius:0 0 10px 35px;
+}
+
+/* BALCONY DOOR */
+
+#balconyDoor{
+    position:absolute;
+    left:30px;
+    top:105px;
+    width:180px;
+    height:300px;
+    background:#536875;
+    border:10px solid #eee2d8;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+    transition:2s;
+}
+
+#balconyDoor .glass{
+    position:absolute;
+    inset:12px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.2),
+            rgba(0,0,0,.18)
+        ),
+        #91aeb9;
+}
+
+#balconyDoor .handle{
+    position:absolute;
+    right:25px;
+    top:50%;
+    width:10px;
+    height:40px;
+    background:#c8b69b;
+    border-radius:10px;
+}
+
+/* =========================
+   BED
+========================= */
+
+#bed{
+    position:absolute;
+    right:45px;
+    bottom:100px;
+    width:380px;
+    height:250px;
+}
+
+.bedFrame{
+    position:absolute;
+    bottom:0;
+    width:100%;
+    height:125px;
+    background:#6e4d43;
+    border-radius:15px;
+    box-shadow:0 15px 25px rgba(0,0,0,.25);
+}
+
+.mattress{
+    position:absolute;
+    left:15px;
+    right:15px;
+    top:35px;
+    height:100px;
+    background:#eee3d8;
+    border-radius:22px;
+    box-shadow:0 8px 15px rgba(0,0,0,.12);
+}
+
+.blanket{
+    position:absolute;
+    left:15px;
+    right:15px;
+    top:75px;
+    height:100px;
+    border-radius:0 0 20px 20px;
+    background:
+        linear-gradient(
+            135deg,
+            #8b9da6,
+            #71858e
+        );
+}
+
+.pillow{
+    position:absolute;
+    top:42px;
+    right:30px;
+    width:110px;
+    height:60px;
+    background:#f8f2eb;
+    border-radius:25px;
+}
+
+/* =========================
+   DESK
+========================= */
+
+#desk{
+    position:absolute;
+    left:260px;
+    bottom:110px;
+    width:260px;
+    height:190px;
+}
+
+.deskTop{
+    position:absolute;
+    top:0;
+    width:100%;
+    height:28px;
+    background:#73564c;
+    border-radius:8px;
+}
+
+.deskLeg{
+    position:absolute;
+    top:25px;
+    width:20px;
+    height:165px;
+    background:#60463e;
+}
+
+.deskLeg.one{left:25px}
+.deskLeg.two{right:25px}
+
+/* LAMP */
+
+#lamp{
+    position:absolute;
+    left:85px;
+    top:-80px;
+    width:100px;
+    height:100px;
+}
+
+.lampShade{
+    position:absolute;
+    left:10px;
+    top:0;
+    width:80px;
+    height:50px;
+    background:#d5b57e;
+    border-radius:50% 50% 20% 20%;
+}
+
+.lampLight{
+    position:absolute;
+    left:-30px;
+    top:35px;
+    width:160px;
+    height:150px;
+    background:radial-gradient(
+        ellipse,
+        rgba(255,221,151,.4),
+        transparent 70%
+    );
+    pointer-events:none;
+    transition:1s;
+}
+
+/* =========================
+   RUG
+========================= */
+
+#rug{
+    position:absolute;
+    left:420px;
+    bottom:30px;
+    width:360px;
+    height:100px;
+    border-radius:50%;
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #b38e91 0px,
+            #b38e91 30px,
+            #a47f82 31px,
+            #a47f82 60px
+        );
+    opacity:.9;
+}
+
+/* =========================
+   MEM
+========================= */
+
+#mem{
+    position:absolute;
+    left:50%;
+    bottom:105px;
+    transform:translateX(-50%);
+    width:170px;
+    height:320px;
+    z-index:10;
+    transition:
+        filter 1s,
+        transform .4s,
+        opacity 1s;
+}
+
+.memHair{
+    position:absolute;
+    top:15px;
+    left:25px;
+    width:120px;
+    height:150px;
+    background:
+        linear-gradient(
+            120deg,
+            #4d344d,
+            #6d4869
+        );
+    border-radius:60px 60px 45px 45px;
+    z-index:1;
+}
+
+.memHair:after{
+    content:"";
+    position:absolute;
+    left:-5px;
+    top:70px;
+    width:35px;
+    height:120px;
+    background:#4d344d;
+    border-radius:30px;
+    transform:rotate(12deg);
+}
+
+.memFace{
+    position:absolute;
+    left:32px;
+    top:35px;
+    width:106px;
+    height:120px;
+    background:
+        linear-gradient(
+            135deg,
+            #ffd6bd,
+            #eab49d
+        );
+    border-radius:50% 50% 47% 47%;
+    z-index:2;
+    box-shadow:inset -8px -10px 15px rgba(100,50,40,.08);
+}
+
+.memEye{
+    position:absolute;
+    top:54px;
+    width:13px;
+    height:17px;
+    background:#342837;
+    border-radius:50%;
+    transition:.8s;
+}
+
+.memEye.left{left:25px}
+.memEye.right{right:25px}
+
+.memMouth{
+    position:absolute;
+    left:40px;
+    top:88px;
+    width:28px;
+    height:12px;
+    border-bottom:3px solid #a95e6e;
+    border-radius:50%;
+    transition:.8s;
+}
+
+.memBody{
+    position:absolute;
+    left:20px;
+    top:145px;
+    width:130px;
+    height:135px;
+    background:
+        linear-gradient(
+            135deg,
+            #a7c8c2,
+            #759d99
+        );
+    border-radius:35px 35px 20px 20px;
+    z-index:1;
+    box-shadow:0 10px 20px rgba(0,0,0,.15);
+}
+
+.memCollar{
+    position:absolute;
+    left:42px;
+    top:0;
+    width:45px;
+    height:35px;
+    background:#e8d7c8;
+    border-radius:0 0 30px 30px;
+}
+
+.memHeart{
+    position:absolute;
+    left:51px;
+    top:55px;
+    font-size:26px;
+    color:#d97e91;
+}
+
+.memArm{
+    position:absolute;
+    top:160px;
+    width:30px;
+    height:100px;
+    background:#efbea7;
+    border-radius:25px;
+    z-index:0;
+}
+
+.memArm.left{
+    left:2px;
+    transform:rotate(12deg);
+}
+
+.memArm.right{
+    right:2px;
+    transform:rotate(-12deg);
+}
+
+/* =========================
+   MEM HORROR STATES
+========================= */
+
+.memHorror{
+    filter:
+        grayscale(.7)
+        contrast(1.5)
+        brightness(.7);
+}
+
+.memHorror .memHair{
+    background:#151118;
+}
+
+.memHorror .memFace{
+    background:#cda99b;
+}
+
+.memHorror .memEye{
+    height:27px;
+    width:15px;
+    background:#09070a;
+    box-shadow:0 0 10px rgba(0,0,0,.8);
+}
+
+.memHorror .memMouth{
+    width:40px;
+    height:30px;
+    left:33px;
+    border:0;
+    border-radius:0 0 30px 30px;
+    background:#21151a;
+}
+
+.memHorror .memHeart{
+    opacity:0;
+}
+
+/* =========================
+   NIGHT MODE
+========================= */
+
+body.night #topbar{
+    background:rgba(15,15,22,.72);
+    color:#eee;
+    border-color:#292933;
+}
+
+body.night #room{
+    background:#161720;
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.7),
+        inset 0 0 150px rgba(0,0,0,.45);
+}
+
+body.night .wall{
+    background:
+        linear-gradient(
+            rgba(18,20,31,.72),
+            rgba(8,9,15,.94)
+        ),
+        #80726e;
+}
+
+body.night .windowSky{
+    background:
+        linear-gradient(
+            #10182b,
+            #172238 65%,
+            #0c101a
+        );
+}
+
+body.night .windowMoon{
+    opacity:1;
+}
+
+body.night .curtain{
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #4a3741 0px,
+            #4a3741 15px,
+            #3b2b35 16px,
+            #3b2b35 27px
+        );
+}
+
+body.night .lampLight{
+    opacity:.85;
+}
+
+/* =========================
+   ACTIONS
+========================= */
+
+#interface{
+    width:min(1100px,94%);
+    margin:0 auto 40px;
+}
+
+#message{
+    min-height:60px;
+    padding:18px 22px;
+    border-radius:16px;
+    background:rgba(255,255,255,.88);
+    box-shadow:0 10px 30px rgba(0,0,0,.12);
+    text-align:center;
+    font-size:17px;
+    line-height:1.8;
+    transition:1s;
+}
+
+body.night #message{
+    background:rgba(20,20,28,.9);
+    color:#eee;
+}
+
+#actions{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;
+    margin-top:15px;
+}
+
+.action{
+    padding:15px;
+    border:0;
+    border-radius:14px;
+    background:#fff;
+    color:#342d31;
+    cursor:pointer;
+    font-size:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,.12);
+    transition:.2s;
+}
+
+.action:hover{
+    transform:translateY(-3px);
+}
+
+.action:active{
+    transform:scale(.96);
+}
+
+body.night .action{
+    background:#191922;
+    color:#eee;
+    border:1px solid #30303c;
+}
+
+.danger{
+    background:#30212c !important;
+    color:white !important;
+}
+
+/* =========================
+   STATS
+========================= */
+
+#stats{
+    margin-top:15px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+}
+
+.stat{
+    background:rgba(255,255,255,.78);
+    padding:13px;
+    border-radius:14px;
+}
+
+body.night .stat{
+    background:#17171f;
+    color:#ddd;
+}
+
+.bar{
+    height:8px;
+    margin-top:8px;
+    background:#ddd;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.fill{
+    height:100%;
+    width:50%;
+    background:#8ba9a2;
+    transition:.5s;
+}
+
+/* =========================
+   JUMPSCARE
+========================= */
+
+#jumpscare{
+    position:fixed;
+    inset:0;
+    z-index:999;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:#050507;
+}
+
+#jumpscare.show{
+    display:flex;
+    animation:flash .18s steps(2);
+}
+
+@keyframes flash{
+    0%{filter:brightness(4)}
+    50%{filter:brightness(.3)}
+    100%{filter:brightness(1)}
+}
+
+.scareFace{
+    width:320px;
+    height:420px;
+    position:relative;
+    transform:scale(1.5);
+    animation:scareZoom .8s forwards;
+}
+
+@keyframes scareZoom{
+    from{
+        transform:scale(.2) rotate(-4deg);
+        opacity:0;
+    }
+    to{
+        transform:scale(1.4);
+        opacity:1;
+    }
+}
+
+.scareHair{
+    position:absolute;
+    width:260px;
+    height:340px;
+    left:30px;
+    top:10px;
+    border-radius:50%;
+    background:#08070b;
+}
+
+.scareHead{
+    position:absolute;
+    width:210px;
+    height:260px;
+    left:55px;
+    top:70px;
+    border-radius:50%;
+    background:#bca19c;
+}
+
+.scareEye{
+    position:absolute;
+    top:105px;
+    width:30px;
+    height:55px;
+    border-radius:50%;
+    background:#050505;
+}
+
+.scareEye.left{left:40px}
+.scareEye.right{right:40px}
+
+.scareMouth{
+    position:absolute;
+    left:70px;
+    top:185px;
+    width:70px;
+    height:50px;
+    background:#080508;
+    border-radius:0 0 50px 50px;
+}
+
+#scareText{
+    position:absolute;
+    bottom:45px;
+    left:0;
+    right:0;
+    text-align:center;
+    color:#fff;
+    font-size:24px;
+}
+
+/* =========================
+   GLITCH
+========================= */
+
+.glitch{
+    animation:glitch .13s infinite;
+}
+
+@keyframes glitch{
+    0%{transform:translate(0)}
+    25%{transform:translate(7px,-2px)}
+    50%{transform:translate(-6px,3px)}
+    75%{transform:translate(3px,1px)}
+    100%{transform:translate(0)}
+}
+
+/* =========================
+   END
+========================= */
+
+#ending{
+    position:fixed;
+    inset:0;
+    background:#050507;
+    color:#eee;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:30px;
+    z-index:500;
+}
+
+#endingBox{
+    max-width:650px;
+    line-height:2;
+}
+
+#ending button{
+    margin-top:20px;
+    padding:15px 30px;
+    border:0;
+    border-radius:12px;
+    cursor:pointer;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:700px){
+
+    #room{
+        height:700px;
     }
 
-    body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: Tahoma, Arial, sans-serif;
-        background: #f4eee6;
-        color: #332c2c;
-        transition: background 2s, color 2s;
-        overflow-x: hidden;
+    #window{
+        width:230px;
+        height:190px;
     }
 
-    body.dark {
-        background: #09090d;
-        color: #ddd;
+    .curtain.left{
+        left:10px;
+        opacity:.6;
     }
 
-    #game {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
+    .curtain.right{
+        right:10px;
+        opacity:.6;
     }
 
-    header {
-        padding: 18px 25px;
-        background: rgba(255,255,255,.8);
-        border-bottom: 1px solid #ddd;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        backdrop-filter: blur(10px);
+    #bed{
+        right:10px;
+        width:280px;
+        transform:scale(.85);
+        transform-origin:right bottom;
     }
 
-    body.dark header {
-        background: rgba(10,10,15,.85);
-        border-color: #292933;
+    #desk{
+        left:10px;
+        transform:scale(.75);
+        transform-origin:left bottom;
     }
 
-    #logo {
-        font-size: 25px;
-        font-weight: bold;
-        letter-spacing: 4px;
+    #rug{
+        left:50%;
+        transform:translateX(-50%);
+        width:260px;
     }
 
-    #day {
-        font-weight: bold;
+    #stats{
+        grid-template-columns:1fr;
     }
-
-    main {
-        width: min(1100px, 94%);
-        margin: auto;
-        padding: 30px 0 60px;
-    }
-
-    #room {
-        min-height: 570px;
-        border-radius: 25px;
-        padding: 25px;
-        position: relative;
-        overflow: hidden;
-        background:
-            linear-gradient(rgba(255,255,255,.55),rgba(255,255,255,.55)),
-            #d9c5b4;
-        box-shadow: 0 20px 60px rgba(0,0,0,.12);
-        transition: 2s;
-    }
-
-    body.dark #room {
-        background:
-            radial-gradient(circle at 50% 20%, #20202d 0%, #09090d 70%);
-        box-shadow: 0 0 80px rgba(0,0,0,.8);
-    }
-
-    #sceneTitle {
-        text-align: center;
-        font-size: 28px;
-        margin: 10px 0 5px;
-    }
-
-    #message {
-        text-align: center;
-        min-height: 28px;
-        opacity: .85;
-        margin-bottom: 20px;
-    }
-
-    #memArea {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 300px;
-    }
-
-    /* شخصية MEM */
-    #mem {
-        width: 180px;
-        height: 250px;
-        position: relative;
-        animation: float 3s ease-in-out infinite;
-        transition: .5s;
-    }
-
-    @keyframes float {
-        0%,100% { transform: translateY(0); }
-        50% { transform: translateY(-8px); }
-    }
-
-    .hair {
-        position: absolute;
-        width: 145px;
-        height: 155px;
-        left: 18px;
-        top: 0;
-        background: #3b2940;
-        border-radius: 48% 48% 42% 42%;
-        z-index: 1;
-    }
-
-    .head {
-        position: absolute;
-        width: 115px;
-        height: 125px;
-        left: 33px;
-        top: 25px;
-        background: #f1c6a8;
-        border-radius: 48% 48% 45% 45%;
-        z-index: 2;
-    }
-
-    .eye {
-        position: absolute;
-        width: 12px;
-        height: 17px;
-        background: #28202a;
-        border-radius: 50%;
-        top: 57px;
-    }
-
-    .eye.left { left: 28px; }
-    .eye.right { right: 28px; }
-
-    .mouth {
-        position: absolute;
-        width: 32px;
-        height: 13px;
-        border-bottom: 3px solid #9d5361;
-        border-radius: 50%;
-        left: 42px;
-        top: 88px;
-    }
-
-    .bodyPart {
-        position: absolute;
-        width: 125px;
-        height: 115px;
-        left: 28px;
-        top: 135px;
-        background: #a9c7c0;
-        border-radius: 35px 35px 20px 20px;
-        z-index: 1;
-    }
-
-    .heart {
-        position: absolute;
-        top: 45px;
-        left: 53px;
-        font-size: 25px;
-    }
-
-    .arm {
-        position: absolute;
-        width: 28px;
-        height: 85px;
-        background: #f1c6a8;
-        border-radius: 20px;
-        top: 145px;
-        z-index: 0;
-    }
-
-    .arm.left {
-        left: 15px;
-        transform: rotate(15deg);
-    }
-
-    .arm.right {
-        right: 15px;
-        transform: rotate(-15deg);
-    }
-
-    .sad .mouth {
-        border-bottom: 0;
-        border-top: 3px solid #9d5361;
-        top: 95px;
-    }
-
-    .scared .eye {
-        width: 17px;
-        height: 23px;
-    }
-
-    .scared .mouth {
-        width: 18px;
-        height: 23px;
-        border: 3px solid #9d5361;
-        border-radius: 50%;
-        left: 48px;
-        top: 88px;
-    }
-
-    /* الأزرار */
-
-    #actions {
-        display: grid;
-        grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
-        gap: 12px;
-        margin-top: 20px;
-    }
-
-    button {
-        border: 0;
-        padding: 14px 16px;
-        border-radius: 14px;
-        cursor: pointer;
-        font-size: 15px;
-        background: #fff;
-        color: #332c2c;
-        box-shadow: 0 5px 15px rgba(0,0,0,.08);
-        transition: .2s;
-    }
-
-    button:hover {
-        transform: translateY(-3px);
-    }
-
-    button:active {
-        transform: scale(.96);
-    }
-
-    body.dark button {
-        background: #191922;
-        color: #eee;
-        border: 1px solid #30303c;
-    }
-
-    .danger {
-        background: #302532 !important;
-        color: #fff !important;
-    }
-
-    #stats {
-        display: grid;
-        grid-template-columns: repeat(3,1fr);
-        gap: 12px;
-        margin-top: 20px;
-    }
-
-    .stat {
-        background: rgba(255,255,255,.65);
-        padding: 15px;
-        border-radius: 15px;
-        text-align: center;
-    }
-
-    body.dark .stat {
-        background: #111119;
-    }
-
-    .bar {
-        height: 8px;
-        background: #ddd;
-        border-radius: 20px;
-        margin-top: 8px;
-        overflow: hidden;
-    }
-
-    .fill {
-        height: 100%;
-        width: 50%;
-        background: #8aa69d;
-        transition: .5s;
-    }
-
-    #overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,.92);
-        color: white;
-        display: none;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        z-index: 100;
-        padding: 25px;
-    }
-
-    #overlayBox {
-        max-width: 600px;
-    }
-
-    #overlayText {
-        font-size: 25px;
-        line-height: 1.8;
-    }
-
-    .hidden {
-        display: none !important;
-    }
-
-    .glitch {
-        animation: glitch .15s infinite;
-    }
-
-    @keyframes glitch {
-        0% { transform: translate(0); }
-        25% { transform: translate(4px,-2px); }
-        50% { transform: translate(-3px,2px); }
-        75% { transform: translate(2px,1px); }
-        100% { transform: translate(0); }
-    }
-
-    #searchArea {
-        text-align: center;
-        padding: 20px;
-    }
-
-    .location {
-        display: inline-block;
-        margin: 8px;
-        min-width: 130px;
-    }
-
-    #ending {
-        display: none;
-        text-align: center;
-        padding: 50px 20px;
-        font-size: 21px;
-        line-height: 2;
-    }
-
-    @media(max-width:600px) {
-        #room {
-            min-height: 600px;
-        }
-
-        #stats {
-            grid-template-columns: 1fr;
-        }
-    }
+}
 </style>
 </head>
 
@@ -367,39 +950,80 @@
 
 <div id="game">
 
-<header>
+<div id="topbar">
     <div id="logo">MEM</div>
-    <div id="day">اليوم 1</div>
-</header>
+    <div id="dayText">اليوم 1 — صباحًا</div>
+</div>
 
-<main>
+<div id="world">
 
 <div id="room">
 
-    <h1 id="sceneTitle">غرفة Mem</h1>
-    <div id="message">Mem تنتظرك.</div>
+    <div class="wall"></div>
+    <div class="floor"></div>
 
-    <div id="memArea">
+    <div id="window">
+        <div class="windowSky"></div>
+        <div class="windowMoon"></div>
+        <div class="windowCity"></div>
+    </div>
 
-        <div id="mem">
+    <div class="curtain left"></div>
+    <div class="curtain right"></div>
 
-            <div class="hair"></div>
+    <div id="balconyDoor">
+        <div class="glass"></div>
+        <div class="handle"></div>
+    </div>
 
-            <div class="head">
-                <div class="eye left"></div>
-                <div class="eye right"></div>
-                <div class="mouth"></div>
-            </div>
+    <div id="desk">
+        <div class="deskTop"></div>
+        <div class="deskLeg one"></div>
+        <div class="deskLeg two"></div>
 
-            <div class="arm left"></div>
-            <div class="arm right"></div>
+        <div id="lamp">
+            <div class="lampShade"></div>
+            <div class="lampLight"></div>
+        </div>
+    </div>
 
-            <div class="bodyPart">
-                <div class="heart">♥</div>
-            </div>
+    <div id="rug"></div>
 
+    <div id="bed">
+        <div class="bedFrame"></div>
+        <div class="mattress"></div>
+        <div class="blanket"></div>
+        <div class="pillow"></div>
+    </div>
+
+    <!-- MEM -->
+
+    <div id="mem">
+
+        <div class="memHair"></div>
+
+        <div class="memFace">
+            <div class="memEye left"></div>
+            <div class="memEye right"></div>
+            <div class="memMouth"></div>
         </div>
 
+        <div class="memArm left"></div>
+        <div class="memArm right"></div>
+
+        <div class="memBody">
+            <div class="memCollar"></div>
+            <div class="memHeart">♥</div>
+        </div>
+
+    </div>
+
+</div>
+
+<div id="interface">
+
+    <div id="message">
+        Mem تنتظرك في غرفتها.
     </div>
 
     <div id="actions"></div>
@@ -409,21 +1033,21 @@
         <div class="stat">
             طعام Mem
             <div class="bar">
-                <div id="memFood" class="fill"></div>
+                <div id="foodBar" class="fill"></div>
             </div>
         </div>
 
         <div class="stat">
             ماء Mem
             <div class="bar">
-                <div id="memWater" class="fill"></div>
+                <div id="waterBar" class="fill"></div>
             </div>
         </div>
 
         <div class="stat">
             سعادة Mem
             <div class="bar">
-                <div id="memHappy" class="fill"></div>
+                <div id="happyBar" class="fill"></div>
             </div>
         </div>
 
@@ -431,409 +1055,979 @@
 
 </div>
 
-<div id="ending"></div>
+</div>
+</div>
 
-</main>
+
+<!-- JUMPSCARE -->
+
+<div id="jumpscare">
+
+    <div class="scareFace">
+
+        <div class="scareHair"></div>
+
+        <div class="scareHead">
+
+            <div class="scareEye left"></div>
+            <div class="scareEye right"></div>
+
+            <div class="scareMouth"></div>
+
+        </div>
+
+    </div>
+
+    <div id="scareText">
+        Mem لم تكن نائمة.
+    </div>
 
 </div>
 
 
-<div id="overlay">
-    <div id="overlayBox">
-        <div id="overlayText"></div>
-        <br>
-        <button onclick="closeOverlay()">متابعة</button>
+<!-- ENDING -->
+
+<div id="ending">
+
+    <div id="endingBox">
+
+        <h1>MEM</h1>
+
+        <p id="endingText"></p>
+
+        <button onclick="location.reload()">
+            اللعب من جديد
+        </button>
+
     </div>
+
 </div>
 
 
 <script>
 
+/* ==========================================
+   VARIABLES
+========================================== */
+
 let day = 1;
+let phase = "morning";
 
 let memFood = 50;
 let memWater = 50;
 let memHappy = 50;
 
-let playerFood = 50;
-let playerWater = 50;
-let playerSleep = 50;
+let playerFood = 60;
+let playerWater = 60;
+let playerSleep = 60;
 
-let teeth = false;
-let searched = false;
+let teethDone = false;
+
+let searchedRoom = false;
+let searchedHall = false;
 let balconyFound = false;
 
-const actions = document.getElementById("actions");
-const message = document.getElementById("message");
-const sceneTitle = document.getElementById("sceneTitle");
-const dayText = document.getElementById("day");
+let horrorLevel = 0;
+let nightCount = 0;
+
 const mem = document.getElementById("mem");
+const message = document.getElementById("message");
+const actions = document.getElementById("actions");
+const dayText = document.getElementById("dayText");
 const room = document.getElementById("room");
 
-function setMessage(text) {
-    message.innerText = text;
+/* ==========================================
+   HELPERS
+========================================== */
+
+function say(text){
+
+    message.innerHTML = text;
+
 }
 
-function updateStats() {
-    document.getElementById("memFood").style.width = memFood + "%";
-    document.getElementById("memWater").style.width = memWater + "%";
-    document.getElementById("memHappy").style.width = memHappy + "%";
-}
+function clearActions(){
 
-function clearActions() {
     actions.innerHTML = "";
+
 }
 
-function addButton(text, fn, className="") {
+function button(text,fn,cls=""){
+
     const b = document.createElement("button");
+
+    b.className = "action " + cls;
+
     b.innerText = text;
-    b.className = className;
+
     b.onclick = fn;
+
     actions.appendChild(b);
+
 }
 
-function makeCharacterNormal() {
-    mem.classList.remove("sad","scared","glitch");
+function updateBars(){
+
+    document.getElementById("foodBar").style.width =
+        memFood + "%";
+
+    document.getElementById("waterBar").style.width =
+        memWater + "%";
+
+    document.getElementById("happyBar").style.width =
+        memHappy + "%";
+
 }
 
-function feedMem() {
-    memFood = Math.min(100, memFood + 20);
-    memHappy = Math.min(100, memHappy + 8);
-    setMessage("Mem: مممم... لذيذ! 🥹");
-    updateStats();
+function setDay(text){
+
+    dayText.innerText = text;
+
 }
 
-function waterMem() {
-    memWater = Math.min(100, memWater + 20);
-    memHappy = Math.min(100, memHappy + 5);
-    setMessage("Mem: شكراً! كنت عطشانة.");
-    updateStats();
+function night(){
+
+    document.body.classList.add("night");
+
 }
 
-function brushTeeth() {
-    teeth = true;
-    memHappy = Math.min(100, memHappy + 10);
-    setMessage("Mem تبتسم لك بعد ما خلصت تنظيف أسنانها. ✨");
-    updateStats();
+function dayMode(){
+
+    document.body.classList.remove("night");
+
 }
 
-function playMem() {
-    memHappy = Math.min(100, memHappy + 20);
-    setMessage("Mem تضحك وتتحرك في الغرفة.");
-    updateStats();
+function horror(){
+
+    horrorLevel++;
+
+    if(horrorLevel >= 2){
+
+        mem.classList.add("memHorror");
+
+    }
+
 }
 
-function sleepDayOne() {
+/* ==========================================
+   AUDIO
+   All sounds are generated by browser.
+========================================== */
 
-    if(memFood < 60 || memWater < 60) {
-        setMessage("يبدو أن Mem ما زالت تحتاج إلى شيء...");
-        mem.classList.add("sad");
+let audioCtx = null;
+
+function audio(){
+
+    if(!audioCtx){
+
+        audioCtx =
+            new (window.AudioContext ||
+            window.webkitAudioContext)();
+
+    }
+
+    return audioCtx;
+}
+
+function beep(freq=200,duration=.2,type="sine",volume=.04){
+
+    try{
+
+        const ctx = audio();
+
+        const osc = ctx.createOscillator();
+
+        const gain = ctx.createGain();
+
+        osc.type = type;
+
+        osc.frequency.value = freq;
+
+        gain.gain.value = volume;
+
+        osc.connect(gain);
+
+        gain.connect(ctx.destination);
+
+        osc.start();
+
+        gain.gain.exponentialRampToValueAtTime(
+            .001,
+            ctx.currentTime + duration
+        );
+
+        osc.stop(ctx.currentTime + duration);
+
+    }catch(e){}
+
+}
+
+function scarySound(){
+
+    beep(70,.7,"sawtooth",.08);
+
+    setTimeout(
+        ()=>beep(40,.5,"triangle",.06),
+        200
+    );
+
+}
+
+function knock(){
+
+    beep(80,.1,"square",.06);
+
+    setTimeout(
+        ()=>beep(70,.1,"square",.06),
+        170
+    );
+
+}
+
+/* ==========================================
+   DAY 1
+========================================== */
+
+function startDay1(){
+
+    dayMode();
+
+    setDay("اليوم 1 — صباحًا");
+
+    say(
+        "Mem تنتظرك في غرفتها. " +
+        "يبدو أنها تريد منك أن تهتم بها اليوم."
+    );
+
+    clearActions();
+
+    button("🍎 إطعام Mem",feedMem);
+    button("💧 إعطاؤها ماء",waterMem);
+    button("🪥 تنظيف أسنانها",brushMem);
+    button("🎀 اللعب معها",playMem);
+    button("🌙 النوم",sleepDay1);
+
+    updateBars();
+
+}
+
+function feedMem(){
+
+    memFood =
+        Math.min(100,memFood+20);
+
+    memHappy =
+        Math.min(100,memHappy+8);
+
+    say(
+        "Mem: مممم... لذيذ! " +
+        "وتبتسم لك."
+    );
+
+    updateBars();
+
+}
+
+function waterMem(){
+
+    memWater =
+        Math.min(100,memWater+20);
+
+    memHappy =
+        Math.min(100,memHappy+5);
+
+    say(
+        "Mem تشرب الماء وتقول: " +
+        "كنت عطشانة فعلًا."
+    );
+
+    updateBars();
+
+}
+
+function brushMem(){
+
+    teethDone = true;
+
+    memHappy =
+        Math.min(100,memHappy+10);
+
+    say(
+        "Mem تبتسم لك بعد تنظيف أسنانها. ✨"
+    );
+
+    updateBars();
+
+}
+
+function playMem(){
+
+    memHappy =
+        Math.min(100,memHappy+20);
+
+    say(
+        "Mem تضحك وتتحرك في الغرفة."
+    );
+
+    updateBars();
+
+}
+
+function sleepDay1(){
+
+    if(
+        memFood < 60 ||
+        memWater < 60 ||
+        !teethDone
+    ){
+
+        mem.classList.add("memHorror");
+
+        say(
+            "Mem تنظر إليك بصمت... " +
+            "يبدو أنها لم تنتهِ من يومها بعد."
+        );
+
+        setTimeout(
+            ()=>mem.classList.remove("memHorror"),
+            1200
+        );
+
         return;
+
     }
 
     day = 2;
-    dayText.innerText = "اليوم 2";
-    sceneTitle.innerText = "صباح اليوم الثاني";
-    setMessage("الغرفة هادئة جدًا... Mem ليست هنا.");
-    makeCharacterNormal();
+
+    night();
+
+    setDay("اليوم 1 — ليلًا");
+
+    say(
+        "البيت هادئ. " +
+        "Mem ذهبت للنوم."
+    );
 
     clearActions();
 
-    addButton("البحث في الغرفة", searchRoom);
-    addButton("فتح الباب", searchHall);
-    addButton("النظر من النافذة", lookWindow);
+    button(
+        "🛏️ النوم",
+        morningDay2
+    );
 
-    document.getElementById("stats").style.display = "none";
-
-    mem.style.display = "none";
-
-    document.body.classList.add("dark");
 }
 
-function searchRoom() {
+/* ==========================================
+   DAY 2
+========================================== */
 
-    if(!searched) {
-        searched = true;
-        setMessage("وجدت كوب Mem... لكنه ما زال دافئًا.");
-        addButton("البحث تحت السرير", underBed);
-    } else {
-        setMessage("لا يوجد شيء آخر هنا.");
-    }
+function morningDay2(){
+
+    day = 2;
+
+    dayMode();
+
+    setDay("اليوم 2 — صباحًا");
+
+    mem.style.opacity = "0";
+
+    say(
+        "تستيقظ... " +
+        "لكن Mem ليست في سريرها."
+    );
+
+    clearActions();
+
+    button(
+        "🔎 البحث في الغرفة",
+        searchRoom
+    );
+
+    button(
+        "🚪 البحث في الممر",
+        searchHall
+    );
+
+    button(
+        "🪟 النظر من النافذة",
+       lookWindow
+    );
+
 }
 
-function underBed() {
-    setMessage("هناك صوت خفيف خلفك... لكن عندما تلتفت، لا يوجد أحد.");
-    addButton("البحث في الممر", searchHall);
+function searchRoom(){
+
+    searchedRoom = true;
+
+    say(
+        "غرفة Mem فارغة. " +
+        "سريرها ما زال دافئًا."
+    );
+
+    clearActions();
+
+    button(
+        "🔎 النظر تحت السرير",
+        underBed
+    );
+
+    button(
+        "🚪 الذهاب للممر",
+        searchHall
+    );
+
 }
 
-function searchHall() {
-    setMessage("الممر فارغ. هناك ضوء يأتي من جهة البلكونة.");
-    addButton("الذهاب إلى البلكونة", goBalcony);
+function underBed(){
+
+    say(
+        "لا يوجد شيء تحت السرير... " +
+        "لكن هناك صوت خفيف من جهة البلكونة."
+    );
+
+    knock();
+
+    clearActions();
+
+    button(
+        "🌙 الذهاب للبلكونة",
+        balcony
+    );
+
 }
 
-function lookWindow() {
-    setMessage("الزجاج بارد جدًا... وعلى سطحه مكتوب: «أنا هنا».");
-    addButton("الذهاب إلى البلكونة", goBalcony);
+function searchHall(){
+
+    searchedHall = true;
+
+    say(
+        "الممر فارغ. " +
+        "باب البلكونة مفتوح."
+    );
+
+    clearActions();
+
+    button(
+        "🌙 الذهاب للبلكونة",
+        balcony
+    );
+
 }
 
-function goBalcony() {
+function lookWindow(){
+
+    say(
+        "من خلال الزجاج ترى ظلًا صغيرًا " +
+        "في البلكونة."
+    );
+
+    horror();
+
+    clearActions();
+
+    button(
+        "🌙 الذهاب للبلكونة",
+        balcony
+    );
+
+}
+
+function balcony(){
 
     balconyFound = true;
 
-    sceneTitle.innerText = "البلكونة";
-    setMessage("Mem موجودة هناك... لكنها لا تتحرك.");
+    setDay("اليوم 2 — البلكونة");
+
+    say(
+        "هناك شخص يقف في البلكونة..."
+    );
 
     clearActions();
 
-    mem.style.display = "block";
-    mem.classList.add("scared");
+    setTimeout(()=>{
 
-    setTimeout(() => {
+        mem.style.opacity = "1";
+
+        mem.style.left = "50%";
+
+        say(
+            "إنها Mem."
+        );
+
+        button(
+            "👁️ الاقتراب منها",
+            approachMem
+        );
+
+    },800);
+
+}
+
+function approachMem(){
+
+    horror();
+
+    say(
+        "Mem لا تتحرك."
+    );
+
+    setTimeout(()=>{
 
         mem.classList.add("glitch");
 
-        setMessage("انتظرت لحظة واحدة فقط... ثم انطفأت الأضواء.");
+        say(
+            "تلتفت إليك ببطء..."
+        );
 
-        setTimeout(() => {
+        scarySound();
 
-            mem.style.display = "none";
-            setMessage("عندما عاد الضوء، لم تعد Mem هناك.");
+    },1000);
 
-            addButton("البحث عنها", continueSearch);
+    setTimeout(()=>{
 
-        }, 1800);
+        mem.classList.remove("glitch");
 
-    }, 1000);
+        mem.style.opacity = "0";
+
+        say(
+            "ثم تنطفئ الأضواء لثانية واحدة."
+        );
+
+    },2400);
+
+    setTimeout(()=>{
+
+        mem.style.opacity = "1";
+
+        mem.classList.add("memHorror");
+
+        say(
+            "عندما يعود الضوء... " +
+            "Mem لم تعد في البلكونة."
+        );
+
+        clearActions();
+
+        button(
+            "🔎 البحث عنها",
+            afterMemDisappears
+        );
+
+    },3800);
+
 }
 
-function continueSearch() {
+function afterMemDisappears(){
 
-    sceneTitle.innerText = "شيء تغيّر";
-    setMessage("وجدتِ شيئًا واحدًا فقط: ملاحظة صغيرة باسمك.");
+    horror();
+
+    setDay("اليوم 2 — شيء غريب");
+
+    say(
+        "على الأرض توجد ملاحظة صغيرة."
+    );
 
     clearActions();
 
-    addButton("قراءة الملاحظة", readNote);
+    button(
+        "📜 قراءة الملاحظة",
+        note
+    );
+
 }
 
-function readNote() {
+function note(){
 
-    showOverlay(
-        "«إذا كنت تبحث عن Mem... لا تبحث عنها كثيرًا.»<br><br>" +
-        "أسفل الجملة يوجد سطر آخر، لكنه ممسوح تقريبًا.<br><br>" +
-        "ثم تسمع صوتًا خافتًا من خلفك."
+    say(
+        "الملاحظة مكتوب عليها:<br><br>" +
+        "<b>«لا تبحث عني بعد منتصف الليل.»</b>"
     );
+
+    clearActions();
+
+    button(
+        "متابعة",
+        day3
+    );
+
+}
+
+/* ==========================================
+   DAY 3
+========================================== */
+
+function day3(){
 
     day = 3;
-    dayText.innerText = "اليوم 3";
 
-    setTimeout(startDayThree, 1000);
-}
+    dayMode();
 
-function startDayThree() {
+    mem.style.opacity = "1";
 
-    sceneTitle.innerText = "اليوم الثالث";
-    setMessage("Mem ليست هنا. لكن هذه المرة... أنت تشعر بالجوع.");
+    mem.classList.remove("memHorror");
 
-    document.body.classList.remove("dark");
+    setDay("اليوم 3 — صباحًا");
 
-    clearActions();
-
-    addButton("تناول الطعام", eatPlayer);
-    addButton("اشرب الماء", drinkPlayer);
-    addButton("استرح", restPlayer);
-    addButton("تجاهل كل شيء", ignorePlayer, "danger");
-}
-
-function eatPlayer() {
-    playerFood = Math.min(100, playerFood + 25);
-    setMessage("تشعر أنك أفضل قليلًا.");
-    afterPlayerAction();
-}
-
-function drinkPlayer() {
-    playerWater = Math.min(100, playerWater + 25);
-    setMessage("الماء البارد يجعلك أكثر انتباهًا.");
-    afterPlayerAction();
-}
-
-function restPlayer() {
-    playerSleep = Math.min(100, playerSleep + 25);
-    setMessage("استرحت قليلًا... لكنك سمعت طرقًا على الباب.");
-    afterPlayerAction();
-}
-
-function ignorePlayer() {
-    playerFood -= 10;
-    playerWater -= 10;
-    setMessage("لم يكن تجاهل احتياجاتك فكرة جيدة.");
-    afterPlayerAction();
-}
-
-function afterPlayerAction() {
-
-    if(playerFood > 70 && playerWater > 70) {
-
-        clearActions();
-
-        setMessage("الآن يمكنك النوم.");
-
-        addButton("النوم", sleepNight);
-
-    } else {
-
-        addButton("النوم", sleepNight);
-
-    }
-}
-
-function sleepNight() {
-
-    day = 4;
-    dayText.innerText = "اليوم 4";
-
-    document.body.classList.add("dark");
-
-    sceneTitle.innerText = "قبل النوم...";
-    setMessage("كل شيء هادئ.");
-
-    clearActions();
-
-    setTimeout(() => {
-
-        setMessage("طق...");
-
-        setTimeout(() => {
-
-            setMessage("طق... طق...");
-
-            setTimeout(() => {
-
-                setMessage("هناك شيء يتحرك خارج الغرفة.");
-
-                mem.classList.add("scared");
-
-                setTimeout(() => {
-
-                    setMessage("ثم يأتي صوت Mem من مكان لا تستطيع تحديده:");
-
-                    showOverlay(
-                        "«أنت لست نائمًا... أليس كذلك؟»"
-                    );
-
-                    setTimeout(startHorror, 1500);
-
-                }, 1800);
-
-            }, 1800);
-
-        }, 1500);
-
-    }, 1000);
-}
-
-function startHorror() {
-
-    sceneTitle.innerText = "؟؟؟";
-    setMessage("منذ هذه اللحظة، لم تعد الغرفة كما كانت.");
-
-    clearActions();
-
-    addButton("فتح الباب", openDoorHorror);
-    addButton("البقاء في الغرفة", stayRoom);
-    addButton("إطفاء الضوء", lightsOff, "danger");
-}
-
-function openDoorHorror() {
-
-    setMessage("الممر فارغ.");
-
-    setTimeout(() => {
-        setMessage("لكن صوت خطواتك لا يتطابق مع خطواتك.");
-    }, 1600);
-
-    addButton("العودة", startHorror);
-}
-
-function stayRoom() {
-
-    setMessage("تجلس على السرير.");
-
-    setTimeout(() => {
-        setMessage("هناك شخص يجلس بجانبك.");
-    }, 1800);
-
-    setTimeout(() => {
-        mem.style.display = "block";
-        mem.classList.add("scared");
-        setMessage("Mem: «أخيرًا.»");
-    }, 3500);
-
-    addButton("التحدث مع Mem", talkToMem);
-}
-
-function lightsOff() {
-
-    room.style.background = "#000";
-    setMessage("لم تعد ترى شيئًا.");
-
-    setTimeout(() => {
-
-        room.classList.add("glitch");
-
-        setMessage("لكن أحدًا يراك.");
-
-        setTimeout(() => {
-            room.classList.remove("glitch");
-        }, 700);
-
-    }, 1500);
-
-    addButton("إعادة الضوء", () => {
-        room.style.background = "";
-        setMessage("الضوء عاد...");
-        startHorror();
-    });
-}
-
-function talkToMem() {
-
-    mem.classList.remove("scared");
-
-    showOverlay(
-        "Mem تنظر إليك.<br><br>" +
-        "«كنت أريد فقط أن أعرف...<br>" +
-        "هل ستبحث عني فعلًا؟»"
+    say(
+        "Mem ليست موجودة... " +
+        "والغريب أنك بدأت تشعر بالتعب والجوع."
     );
 
-    setTimeout(() => {
+    clearActions();
 
-        sceneTitle.innerText = "النهاية؟";
-        setMessage("لم تعرف هل ما حدث كان حقيقيًا.");
+    button(
+        "🍞 تناول الطعام",
+        playerEat
+    );
+
+    button(
+        "💧 اشرب الماء",
+        playerDrink
+    );
+
+    button(
+        "🛏️ استرح",
+        playerRest
+    );
+
+    button(
+        "🔎 ابحث عن Mem",
+        searchMem3
+    );
+
+}
+
+function playerEat(){
+
+    playerFood =
+        Math.min(100,playerFood+25);
+
+    say(
+        "تناولت شيئًا. تشعر بتحسن قليل."
+    );
+
+    nextDay3();
+
+}
+
+function playerDrink(){
+
+    playerWater =
+        Math.min(100,playerWater+25);
+
+    say(
+        "شربت الماء."
+    );
+
+    nextDay3();
+
+}
+
+function playerRest(){
+
+    playerSleep =
+        Math.min(100,playerSleep+25);
+
+    say(
+        "استرحت قليلًا..."
+    );
+
+    setTimeout(
+        ()=>knock(),
+        900
+    );
+
+    nextDay3();
+
+}
+
+function searchMem3(){
+
+    horror();
+
+    say(
+        "لا تجد Mem. " +
+        "لكنها تركت صورتها على المكتب."
+    );
+
+    setTimeout(()=>{
+
+        say(
+            "في الصورة... كانت Mem تنظر إلى الكاميرا."
+        );
+
+    },1500);
+
+    nextDay3();
+
+}
+
+function nextDay3(){
+
+    clearActions();
+
+    button(
+        "🌙 النوم",
+        night3
+    );
+
+}
+
+/* ==========================================
+   NIGHT 3
+========================================== */
+
+function night3(){
+
+    night();
+
+    setDay("اليوم 3 — قبل النوم");
+
+    say(
+        "تستلقي على السرير. " +
+        "الغرفة ما زالت كما هي."
+    );
+
+    clearActions();
+
+    button(
+        "😴 إغلاق عينيك",
+        sleepScene
+    );
+
+}
+
+function sleepScene(){
+
+    say(
+        "تغلق عينيك..."
+    );
+
+    setTimeout(()=>{
+
+        beep(55,.8,"sine",.04);
+
+        say(
+            "طق..."
+        );
+
+    },1200);
+
+    setTimeout(()=>{
+
+        knock();
+
+        say(
+            "طق... طق..."
+        );
+
+    },2500);
+
+    setTimeout(()=>{
+
+        say(
+            "تسمع خطوات في الممر."
+        );
+
+        horror();
+
+    },4000);
+
+    setTimeout(()=>{
+
+        say(
+            "الخطوات توقفت أمام باب غرفتك."
+        );
+
+    },5500);
+
+    setTimeout(()=>{
+
+        jumpScare();
+
+    },7000);
+
+}
+
+/* ==========================================
+   JUMPSCARE
+========================================== */
+
+function jumpScare(){
+
+    const scare =
+        document.getElementById("jumpscare");
+
+    scare.classList.add("show");
+
+    scarySound();
+
+    setTimeout(()=>{
+
+        scare.classList.remove("show");
+
+        horrorNight();
+
+    },1800);
+
+}
+
+/* ==========================================
+   HORROR NIGHT
+========================================== */
+
+function horrorNight(){
+
+    day = 4;
+
+    setDay("اليوم 4 — ؟؟؟");
+
+    room.classList.add("glitch");
+
+    say(
+        "تجلس على السرير... " +
+        "ولا تعرف هل ما حدث كان حلمًا."
+    );
+
+    setTimeout(()=>{
+
+        room.classList.remove("glitch");
+
+        mem.classList.add("memHorror");
+
+        mem.style.opacity = "1";
+
+        say(
+            "ثم ترى Mem واقفة عند الباب."
+        );
 
         clearActions();
 
-        addButton("ابدأ من جديد", () => location.reload());
+        button(
+            "👁️ التحدث معها",
+            talkHorror
+        );
 
-    }, 1000);
+        button(
+            "🚪 الابتعاد",
+            leaveHorror
+        );
+
+    },2500);
+
 }
 
-function showOverlay(text) {
-    document.getElementById("overlayText").innerHTML = text;
-    document.getElementById("overlay").style.display = "flex";
+function talkHorror(){
+
+    say(
+        "Mem: «كنتِ تبحثين عني...»"
+    );
+
+    setTimeout(()=>{
+
+        say(
+            "Mem: «لكن هل كنتِ تعرفين لماذا؟»"
+        );
+
+    },2000);
+
+    setTimeout(()=>{
+
+        clearActions();
+
+        button(
+            "معرفة الحقيقة",
+            endingTruth
+        );
+
+        button(
+            "الهروب",
+            endingEscape
+        );
+
+    },4000);
+
 }
 
-function closeOverlay() {
-    document.getElementById("overlay").style.display = "none";
+function leaveHorror(){
+
+    say(
+        "تفتح الباب..."
+    );
+
+    setTimeout(()=>{
+
+        say(
+            "لكن الغرفة خلف الباب هي غرفتك نفسها."
+        );
+
+        horror();
+
+    },1800);
+
+    setTimeout(()=>{
+
+        clearActions();
+
+        button(
+            "العودة",
+            horrorNight
+        );
+
+    },3500);
+
 }
 
-updateStats();
+/* ==========================================
+   ENDINGS
+========================================== */
 
-addButton("أطعم Mem 🍎", feedMem);
-addButton("أعطها ماء 💧", waterMem);
-addButton("نظف أسنانها 🪥", brushTeeth);
-addButton("العب معها 🎀", playMem);
-addButton("النوم 🌙", sleepDayOne);
+function endingTruth(){
+
+    document.getElementById("ending").style.display =
+        "flex";
+
+    document.getElementById("endingText").innerHTML =
+
+        "اكتشفت أن Mem لم تكن تحاول إخافتك.<br><br>" +
+
+        "كانت تحاول لفت انتباهك إلى شيء غريب " +
+        "حدث في البيت منذ اليوم الأول.<br><br>" +
+
+        "لكن قبل أن تفهم الحقيقة كاملة..." +
+
+        "<br><br><b>" +
+
+        "انطفأت الشاشة."
+
+        + "</b>";
+
+}
+
+function endingEscape(){
+
+    document.getElementById("ending").style.display =
+        "flex";
+
+    document.getElementById("endingText").innerHTML =
+
+        "خرجت من الغرفة.<br><br>" +
+
+        "أغلقت الباب خلفك.<br><br>" +
+
+        "بعد عدة خطوات سمعت صوت Mem من الداخل:<br><br>" +
+
+        "<b>«نسيت شيئًا...»</b><br><br>" +
+
+        "ثم سمعت صوت خطوات خلفك.";
+
+}
+
+/* ==========================================
+   START
+========================================== */
+
+startDay1();
 
 </script>
 
